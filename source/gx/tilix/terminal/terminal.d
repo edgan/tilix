@@ -2902,8 +2902,18 @@ private:
 
         GVariantBuilder fdBuilder = new GVariantBuilder(new GVariantType("a{uh}"));
         foreach(i, fd; handles) {
-            fdBuilder.addValue(new GVariant(new GVariant(i), new GVariant(g_variant_new_handle(fd), true)));
+            // Cast the index to uint for the key
+            auto key = new GVariant(g_variant_new_uint32(cast(uint)i));
+            auto value = new GVariant(g_variant_new_handle(fd));
+
+            auto entry = new GVariant(g_variant_new_dict_entry(
+                key.getVariantStruct(),
+                value.getVariantStruct()
+            ));
+
+            fdBuilder.addValue(entry);
         }
+
         GVariantBuilder envBuilder = new GVariantBuilder(new GVariantType("a{ss}"));
         foreach(env; envv) {
             string[] envPair = env.split("=");
